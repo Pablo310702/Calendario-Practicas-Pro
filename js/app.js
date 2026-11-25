@@ -486,6 +486,8 @@ function exportExcel(){
   state.ui.lastExport=new Date().toLocaleString('es-GT'); saveState(); updateDashboard();
 }
 
+window.getPracticeState=()=>JSON.parse(JSON.stringify(state));
+window.replacePracticeState=value=>{ state=normalizeState(value); saveState(); hydrateConfig(); currentMonth=dateFromISO(state.config.startDate); renderAll(); };
 registerServiceWorker();
 setupInstallPrompt();
 hydrateConfig();

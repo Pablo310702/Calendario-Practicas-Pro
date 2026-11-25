@@ -31,5 +31,13 @@ Para una demostración pública puedes activar GitHub Pages en Settings > Pages,
 ## Distribución comercial
 Elige tus condiciones de licencia antes de publicar. No se ha asignado una licencia de código abierto. Una versión descargable puede distribuirse como ZIP; la protección contra copias no está implementada. Para suscripciones, añade autenticación, servidor, base de datos, pagos y controles de acceso.
 
+## Sistema conectado
+
+Por defecto la aplicación funciona en modo local y conserva los datos en el navegador. También incluye una PWA instalable, búsqueda y filtros de registros, y un modo opcional de cuentas y sincronización con Supabase.
+
+Para activar usuarios y sincronización, ejecuta [`supabase/schema.sql`](supabase/schema.sql), sigue [`supabase/README.md`](supabase/README.md) y configura `js/cloud-config.js`. Nunca pongas una `service_role key` en el frontend.
+
+Los eventos de uso se registran en Supabase, pero el navegador no puede cobrar de forma segura. Para cobrar por uso se necesita una cuenta de Stripe y un backend/webhook que valide eventos, aplique límites y procese los pagos hacia tu cuenta.
+
 ## Pruebas recomendadas
 Verifica edición de días, recálculo, persistencia, importación/exportación, contraste del tema, logo y vista previa de impresión. Revisa el Excel en Microsoft Excel.

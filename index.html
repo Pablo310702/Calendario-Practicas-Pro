@@ -91,6 +91,26 @@
     </div>
   </section>
 
+  <section class="panel account-panel" aria-labelledby="accountTitle">
+    <div class="personal-title">
+      <div>
+        <h2 class="subheading" id="accountTitle">Cuenta y sincronización</h2>
+        <p class="account-help" id="cloudStatus">Modo local activo. Configura la nube para usar tu cuenta en varios dispositivos.</p>
+      </div>
+      <span class="cloud-state" id="cloudState">Local</span>
+    </div>
+    <div class="account-grid">
+      <div class="field"><label for="accountEmail">Correo</label><input id="accountEmail" type="email" autocomplete="email" placeholder="estudiante@correo.com"></div>
+      <div class="field"><label for="accountPassword">Contraseña</label><input id="accountPassword" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres"></div>
+      <div class="actions account-actions">
+        <button class="btn primary" id="signInBtn" type="button">Iniciar sesión</button>
+        <button class="btn soft" id="signUpBtn" type="button">Crear cuenta</button>
+        <button class="btn soft" id="syncBtn" type="button" disabled>Sincronizar</button>
+        <button class="btn soft hidden" id="signOutBtn" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </section>
+
   <div class="note">
     <strong>Cómo funciona:</strong> los días hábiles pasados sin modificación se consideran asistidos al 100%; los días futuros se consideran programados.
     Marca <b>Faltó</b>, <b>Parcial</b> o <b>No laborable</b> y la fecha estimada para completar la meta se recalcula automáticamente.
@@ -257,6 +277,9 @@
 </dialog>
 
 <section id="printReport" aria-hidden="true"></section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/cloud-config.js"></script>
 <script src="js/app.js"></script>
+<script src="js/cloud.js"></script>
 </body>
 </html>

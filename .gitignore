@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 .env
 .env.*
+js/cloud-config.local.js
 *.xlsx
 *.pdf
 respaldo*.json

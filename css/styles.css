@@ -81,6 +81,12 @@ header p{margin:0;opacity:.92}
 main{max-width:1250px;margin:-18px auto 50px;padding:0 18px}
 .panel{background:var(--panel);border:1px solid rgba(var(--brand-rgb),.10);border-radius:18px;box-shadow:var(--shadow);transition:background .25s,border-color .25s}
 .settings,.personalization{padding:16px;margin-bottom:16px}
+.account-panel{padding:16px;margin-bottom:16px}
+.account-help{margin:0;color:var(--muted);font-size:13px}
+.account-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+.account-actions{height:44px;align-items:stretch}
+.cloud-state{padding:7px 11px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-weight:800;font-size:12px}
+.cloud-error{background:var(--bad);color:var(--bad-ink)}
 .settings-grid,.personal-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end}
 .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.35px}
 .field input,.field select{
@@ -204,6 +210,8 @@ dialog::backdrop{background:rgba(10,25,20,.45)}
   .cards{grid-template-columns:repeat(2,1fr)}
   .dashboard-shell{grid-template-columns:1fr}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .account-grid{grid-template-columns:1fr 1fr}
+  .account-actions{grid-column:1/-1;justify-content:flex-start}
 }
 @media(max-width:700px){
   main{padding:0 10px}
@@ -215,6 +223,8 @@ dialog::backdrop{background:rgba(10,25,20,.45)}
   .summary-grid,.mini-metrics{grid-template-columns:1fr}
   .status-row{grid-template-columns:1fr}
   .record-search{min-width:0;width:100%}
+  .account-grid{grid-template-columns:1fr}
+  .account-actions{grid-column:auto;height:auto}
   .header-meta{justify-content:flex-start}
 }
 @media(max-width:520px){
