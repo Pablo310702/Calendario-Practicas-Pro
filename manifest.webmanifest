@@ -1,0 +1,11 @@
+{
+  "name": "Calendario de Prácticas Pro",
+  "short_name": "Prácticas Pro",
+  "description": "Sistema para planificar y registrar horas de prácticas profesionales.",
+  "lang": "es-GT",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#1f6b54",
+  "icons": [{"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

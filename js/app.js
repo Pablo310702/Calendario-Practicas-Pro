@@ -20,16 +20,32 @@ function loadState(){
   try{
     const x=JSON.parse(localStorage.getItem(STORE));
     if(x && x.config && x.records){
-      return {
+      return normalizeState({
         config:{...DEFAULT.config,...x.config},
         ui:{...DEFAULT.ui,...(x.ui||{})},
         records:x.records||{}
-      };
+      });
     }
   }catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULT));
+  return normalizeState(JSON.parse(JSON.stringify(DEFAULT)));
+}
+function normalizeState(value){
+  const next=value||JSON.parse(JSON.stringify(DEFAULT));
+  next.config={...DEFAULT.config,...(next.config||{})};
+  next.config.targetHours=Math.max(1,Number(next.config.targetHours)||DEFAULT.config.targetHours);
+  next.config.dailyHours=Math.max(.5,Math.min(24,Number(next.config.dailyHours)||DEFAULT.config.dailyHours));
+  next.records=next.records&&typeof next.records==='object'?next.records:{};
+  next.ui={...DEFAULT.ui,...(next.ui||{})};
+  return next;
 }
 function saveState(){ localStorage.setItem(STORE,JSON.stringify(state)); }
+let toastTimer;
+function showToast(message,type='success'){
+  const toast=document.getElementById('toast');
+  if(!toast)return;
+  toast.textContent=message; toast.className=`toast visible ${type}`;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('visible'),2600);
+}
 function iso(d){ return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); }
 function dateFromISO(s){ return new Date(s+'T12:00:00'); }
 function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
@@ -222,11 +238,16 @@ function renderCalendar(){
 }
 function renderTable(){
   const dates=buildDates(), body=document.getElementById('recordsBody'), filter=document.getElementById('monthFilter').value;
+  const statusFilter=document.getElementById('recordStatusFilter')?.value||'all';
+  const search=(document.getElementById('recordSearch')?.value||'').trim().toLocaleLowerCase('es-GT');
   body.innerHTML='';
   for(const s of dates){
     if(filter!=='all' && monthKey(s)!==filter) continue;
     const r=effectiveRecord(s), tr=document.createElement('tr');
     const day=cap(dateFromISO(s).toLocaleDateString('es-GT',{weekday:'long'}));
+    const searchable=`${s} ${fmtDate(s)} ${day} ${r.note||''}`.toLocaleLowerCase('es-GT');
+    if(statusFilter!=='all' && r.status!==statusFilter) continue;
+    if(search && !searchable.includes(search)) continue;
     tr.innerHTML=`
       <td><strong>${fmtDate(s)}</strong></td>
       <td>${day}</td>
@@ -238,6 +259,9 @@ function renderTable(){
       <td><input class="hours-input" type="number" min="0" max="${state.config.dailyHours}" step="0.25" value="${r.status==='partial'?r.hours:(r.status==='attended'?state.config.dailyHours:0)}" data-hours="${s}" ${r.status==='partial'?'':'disabled'}></td>
       <td><input class="status-select" style="min-width:220px" type="text" maxlength="120" value="${xml(r.note||'')}" placeholder="Opcional" data-note="${s}"></td>`;
     body.appendChild(tr);
+  }
+  if(!body.children.length){
+    body.innerHTML='<tr><td colspan="5" class="empty-state">No hay registros que coincidan con los filtros.</td></tr>';
   }
   body.querySelectorAll('[data-date]').forEach(el=>el.onchange=e=>{
     const s=e.target.dataset.date, val=e.target.value, old=effectiveRecord(s);
@@ -262,6 +286,22 @@ function renderMonthFilter(){
 }
 function renderAll(){
   updateDashboard(); renderMonthFilter(); renderCalendar(); renderTable(); applyUI(false);
+}
+function registerServiceWorker(){
+  if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+let deferredInstallPrompt=null;
+function setupInstallPrompt(){
+  const button=document.getElementById('installBtn');
+  if(!button)return;
+  window.addEventListener('beforeinstallprompt',event=>{
+    event.preventDefault(); deferredInstallPrompt=event; button.classList.remove('hidden');
+  });
+  button.onclick=async()=>{
+    if(!deferredInstallPrompt)return;
+    deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null; button.classList.add('hidden');
+  };
 }
 function renderLogo(){
   const data=state.ui.logoData;
@@ -301,26 +341,39 @@ document.getElementById('saveDay').onclick=()=>{
     hours:st==='partial'?Math.max(0,Math.min(Number(state.config.dailyHours),Number(document.getElementById('dialogHours').value)||0)):(st==='attended'?Number(state.config.dailyHours):0),
     note:document.getElementById('dialogNote').value.trim()
   };
-  saveState(); document.getElementById('editDialog').close(); renderAll();
+  saveState(); document.getElementById('editDialog').close(); renderAll(); showToast('Registro guardado correctamente.');
 };
 document.getElementById('clearDay').onclick=()=>{
   delete state.records[editingDate]; saveState(); document.getElementById('editDialog').close(); renderAll();
 };
 document.getElementById('saveConfig').onclick=()=>{
+  const startDate=document.getElementById('startDate').value||DEFAULT.config.startDate;
+  const targetHours=Number(document.getElementById('targetHours').value);
+  const dailyHours=Number(document.getElementById('dailyHours').value);
+  if(!targetHours || targetHours<1 || !dailyHours || dailyHours<.5 || dailyHours>24){
+    showToast('Revisa la meta y las horas diarias.','error'); return;
+  }
   state.config={
-    startDate:document.getElementById('startDate').value||DEFAULT.config.startDate,
-    targetHours:Number(document.getElementById('targetHours').value)||1000,
-    dailyHours:Number(document.getElementById('dailyHours').value)||8,
+    startDate,
+    targetHours,
+    dailyHours,
     startTime:document.getElementById('startTime').value||'08:00',
     endTime:document.getElementById('endTime').value||'17:00'
   };
-  saveState(); currentMonth=dateFromISO(state.config.startDate); renderAll();
+  saveState(); currentMonth=dateFromISO(state.config.startDate); renderAll(); showToast('Configuración guardada.');
 };
 document.getElementById('prevMonth').onclick=()=>{ currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1,12); renderCalendar(); };
 document.getElementById('nextMonth').onclick=()=>{ currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1,12); renderCalendar(); };
 document.getElementById('goToday').onclick=()=>{ const t=new Date(); currentMonth=new Date(t.getFullYear(),t.getMonth(),1,12); renderCalendar(); };
+document.getElementById('registerToday').onclick=()=>{
+  const today=todayISO();
+  if(today<state.config.startDate){ showToast('La fecha de inicio todavía no ha llegado.','error'); return; }
+  openDialog(today);
+};
 document.getElementById('printBtn').onclick=()=>{ renderPrint(); window.print(); };
 document.getElementById('monthFilter').onchange=renderTable;
+document.getElementById('recordStatusFilter').onchange=renderTable;
+document.getElementById('recordSearch').oninput=renderTable;
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
@@ -433,6 +486,8 @@ function exportExcel(){
   state.ui.lastExport=new Date().toLocaleString('es-GT'); saveState(); updateDashboard();
 }
 
+registerServiceWorker();
+setupInstallPrompt();
 hydrateConfig();
 applyUI(false);
 renderAll();

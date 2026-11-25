@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1f6b54">
+<meta name="description" content="Sistema para planificar y registrar horas de prácticas profesionales.">
 <title>Calendario de prácticas</title>
 <link rel="stylesheet" href="css/styles.css">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -20,6 +23,7 @@
     <div class="header-meta">
       <div class="head-chip" id="companyBadge">Empresa / institución</div>
       <div class="head-chip" id="modeBadge">Modo claro</div>
+      <button class="btn header-install hidden" id="installBtn" type="button">Instalar app</button>
     </div>
   </div>
 </header>
@@ -162,6 +166,7 @@
       </div>
       <div class="actions">
         <button class="btn soft" id="goToday">Ir a hoy</button>
+        <button class="btn primary" id="registerToday">Registrar hoy</button>
         <button class="btn soft" id="printBtn">Imprimir / PDF</button>
       </div>
     </div>
@@ -182,7 +187,16 @@
     <div class="toolbar">
       <h2>Registro detallado</h2>
       <div class="actions">
+        <input id="recordSearch" class="status-select record-search" type="search" placeholder="Buscar fecha u observación" aria-label="Buscar en registros">
         <select id="monthFilter" class="status-select"><option value="all">Todos los meses</option></select>
+        <select id="recordStatusFilter" class="status-select" aria-label="Filtrar por estado">
+          <option value="all">Todos los estados</option>
+          <option value="attended">Asistió</option>
+          <option value="absent">Faltó</option>
+          <option value="partial">Parcial</option>
+          <option value="off">No laborable</option>
+          <option value="scheduled">Programado</option>
+        </select>
         <button class="btn soft" onclick="renderPrint();window.print()">Imprimir / PDF</button>
         <button class="btn soft" id="exportCsv">Exportar Excel (.xlsx)</button>
         <button class="btn soft" id="exportJson">Respaldo JSON</button>
@@ -210,6 +224,8 @@
 
   <div class="footer">Los datos se guardan localmente en este navegador. No se envían a ningún servidor.</div>
 </main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <dialog id="editDialog">
   <div class="modal-head"><h3 id="dialogTitle">Editar día</h3></div>

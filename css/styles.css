@@ -77,6 +77,7 @@ header p{margin:0;opacity:.92}
   padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.14);
   border:1px solid rgba(255,255,255,.2);font-weight:700;font-size:13px
 }
+.header-install{background:#fff;color:var(--brand-dark);padding:9px 12px;font-size:12px}
 main{max-width:1250px;margin:-18px auto 50px;padding:0 18px}
 .panel{background:var(--panel);border:1px solid rgba(var(--brand-rgb),.10);border-radius:18px;box-shadow:var(--shadow);transition:background .25s,border-color .25s}
 .settings,.personalization{padding:16px;margin-bottom:16px}
@@ -180,6 +181,11 @@ th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left}
 th{background:var(--panel-2);font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.35px;position:sticky;top:0;z-index:1}
 td{font-size:14px}.muted{color:var(--muted)}
 .status-select,.hours-input{border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--input-bg);color:var(--ink)}
+.record-search{min-width:220px}
+.empty-state{text-align:center;color:var(--muted);padding:28px!important}
+.toast{position:fixed;right:20px;bottom:20px;z-index:20;max-width:min(360px,calc(100% - 40px));padding:13px 16px;border-radius:12px;background:var(--ink);color:var(--panel);box-shadow:var(--shadow);font-weight:700;opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s}
+.toast.visible{opacity:1;transform:translateY(0)}
+.toast.error{background:#a43a3a;color:#fff}
 .hours-input{width:80px}
 .summary-box{margin-top:16px;padding:16px}
 .summary-box h3{margin:0 0 10px}
@@ -208,6 +214,7 @@ dialog::backdrop{background:rgba(10,25,20,.45)}
   .day .badge{font-size:0;padding:5px;width:10px;height:10px}.day .hours{font-size:10px}
   .summary-grid,.mini-metrics{grid-template-columns:1fr}
   .status-row{grid-template-columns:1fr}
+  .record-search{min-width:0;width:100%}
   .header-meta{justify-content:flex-start}
 }
 @media(max-width:520px){
