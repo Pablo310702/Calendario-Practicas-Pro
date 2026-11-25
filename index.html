@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de prácticas</title>
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-logo" id="headerLogoWrap"><span id="headerLogoFallback">CP</span><img id="headerLogo" class="hidden" alt="Logo"></div>
+      <div class="header-text">
+        <h1>Calendario de prácticas</h1>
+        <p id="headerSubtitle">Seguimiento de días hábiles, asistencias, faltas y horas parciales.</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="head-chip" id="companyBadge">Empresa / institución</div>
+      <div class="head-chip" id="modeBadge">Modo claro</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="panel settings">
+    <div class="settings-grid">
+      <div class="field"><label>Fecha de inicio</label><input id="startDate" type="date"></div>
+      <div class="field"><label>Meta de horas</label><input id="targetHours" type="number" min="1" step="1"></div>
+      <div class="field"><label>Horas efectivas/día</label><input id="dailyHours" type="number" min="0.5" max="24" step="0.5"></div>
+      <div class="field"><label>Entrada</label><input id="startTime" type="time"></div>
+      <div class="field"><label>Salida</label><input id="endTime" type="time"></div>
+      <div><button class="btn primary" id="saveConfig">Guardar configuración</button></div>
+    </div>
+  </section>
+
+  <section class="panel personalization">
+    <div class="personal-title">
+      <h2 class="subheading">Personalización visual</h2>
+      <div class="quick-actions">
+        <button class="btn soft" id="toggleDarkMode">🌙 Modo noche</button>
+        <button class="btn soft" id="applyThemeBtn">🎨 Aplicar tema</button>
+      </div>
+    </div>
+    <div class="personal-grid">
+      <div class="field">
+        <label>Nombre de empresa / institución</label>
+        <input id="companyName" type="text" maxlength="80" placeholder="Ej. Municipalidad de Antigua Guatemala">
+      </div>
+      <div class="field">
+        <label>Modo de visualización</label>
+        <select id="themeMode">
+          <option value="light">Claro</option>
+          <option value="dark">Noche</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Color del tema</label>
+        <select id="themePreset">
+          <option value="#1f6b54">Verde institucional</option>
+          <option value="#0f5fa8">Azul</option>
+          <option value="#7a2748">Vino</option>
+          <option value="#5b3ea6">Morado</option>
+          <option value="#b56b10">Naranja</option>
+          <option value="#1d7c6d">Turquesa</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Color personalizado</label>
+        <input id="accentColor" type="color" value="#1f6b54">
+      </div>
+      <div class="field">
+        <label>Logo de la empresa</label>
+        <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+      </div>
+      <div class="field">
+        <label>Vista previa del logo</label>
+        <div class="logo-preview" id="logoPreview"><span>Sin logo</span></div>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn primary" id="savePersonalization">Guardar personalización</button>
+      <button class="btn soft" id="removeLogo">Quitar logo</button>
+      <button class="btn soft" id="resetTheme">Restaurar tema</button>
+    </div>
+  </section>
+
+  <div class="note">
+    <strong>Cómo funciona:</strong> los días hábiles pasados sin modificación se consideran asistidos al 100%; los días futuros se consideran programados.
+    Marca <b>Faltó</b>, <b>Parcial</b> o <b>No laborable</b> y la fecha estimada para completar la meta se recalcula automáticamente.
+  </div>
+
+  <section class="dashboard-shell">
+    <div>
+      <section class="cards">
+        <div class="panel card"><div class="label">Horas acumuladas</div><div class="value" id="actualHours">0</div><div class="sub">hasta hoy</div></div>
+        <div class="panel card"><div class="label">Horas pendientes</div><div class="value" id="remainingHours">0</div><div class="sub">para llegar a la meta</div></div>
+        <div class="panel card"><div class="label">Faltas marcadas</div><div class="value" id="absenceCount">0</div><div class="sub" id="lostHoursText">0 h afectadas</div></div>
+        <div class="panel card"><div class="label">Finalización estimada</div><div class="value" id="projectedDate" style="font-size:24px">—</div><div class="sub" id="projectedSub">—</div></div>
+      </section>
+      <section class="panel dashboard-panel" style="margin-top:14px">
+        <h3>Dashboard general</h3>
+        <div class="progress-wrap" style="padding:0;margin-bottom:15px">
+          <div class="progress-head"><span>Progreso real</span><span id="progressText">0%</span></div>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut-stack">
+            <div class="donut" id="donutChart"></div>
+            <div class="donut-center">
+              <div class="donut-value" id="donutValue">0%</div>
+              <div class="donut-label">completado</div>
+            </div>
+          </div>
+          <div class="mini-metrics">
+            <div class="metric-box"><span>Días trabajados</span><strong id="workedDays">0</strong></div>
+            <div class="metric-box"><span>Días proyectados</span><strong id="workdaysProjectedTop">0</strong></div>
+            <div class="metric-box"><span>Horas no realizadas</span><strong id="affectedHoursTop">0 h</strong></div>
+            <div class="metric-box"><span>Días restantes aprox.</span><strong id="daysRemaining">0</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="dashboard-side">
+      <section class="panel dashboard-panel">
+        <h3>Distribución de estados</h3>
+        <div class="status-bars" id="statusBars"></div>
+        <div class="legend-inline">
+          <span class="badge s-attended">Asistió</span>
+          <span class="badge s-absent">Faltó</span>
+          <span class="badge s-partial">Parcial</span>
+          <span class="badge s-off">No laborable</span>
+          <span class="badge s-scheduled">Programado</span>
+        </div>
+      </section>
+      <section class="panel dashboard-panel">
+        <h3>Resumen rápido</h3>
+        <div class="summary-grid" style="grid-template-columns:1fr 1fr">
+          <div class="kpi">Meta de horas<strong id="targetHoursDash">—</strong></div>
+          <div class="kpi">Horario<strong id="scheduleDash">—</strong></div>
+          <div class="kpi">Inicio del plan<strong id="startDateDash">—</strong></div>
+          <div class="kpi">Última exportación<strong id="lastExportDash">—</strong></div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" data-view="calendarView">Calendario</button>
+    <button class="tab" data-view="tableView">Registro detallado</button>
+  </div>
+
+  <section class="panel view active" id="calendarView">
+    <div class="toolbar">
+      <h2>Calendario mensual</h2>
+      <div class="month-nav">
+        <button class="iconbtn" id="prevMonth" aria-label="Mes anterior">‹</button>
+        <div id="monthLabel">—</div>
+        <button class="iconbtn" id="nextMonth" aria-label="Mes siguiente">›</button>
+      </div>
+      <div class="actions">
+        <button class="btn soft" id="goToday">Ir a hoy</button>
+        <button class="btn soft" id="printBtn">Imprimir / PDF</button>
+      </div>
+    </div>
+    <div class="calendar">
+      <div class="weekdays"><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div></div>
+      <div class="calgrid" id="calendarGrid"></div>
+    </div>
+    <div class="legend">
+      <span class="badge s-attended">Asistió</span>
+      <span class="badge s-absent">Faltó</span>
+      <span class="badge s-partial">Parcial</span>
+      <span class="badge s-off">No laborable</span>
+      <span class="badge s-scheduled">Programado</span>
+    </div>
+  </section>
+
+  <section class="panel view" id="tableView">
+    <div class="toolbar">
+      <h2>Registro detallado</h2>
+      <div class="actions">
+        <select id="monthFilter" class="status-select"><option value="all">Todos los meses</option></select>
+        <button class="btn soft" onclick="renderPrint();window.print()">Imprimir / PDF</button>
+        <button class="btn soft" id="exportCsv">Exportar Excel (.xlsx)</button>
+        <button class="btn soft" id="exportJson">Respaldo JSON</button>
+        <label class="btn soft" style="display:inline-block">Importar JSON<input id="importJson" type="file" accept=".json" hidden></label>
+        <button class="btn danger" id="resetBtn">Reiniciar</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Día</th><th>Estado</th><th>Horas</th><th>Observación</th></tr></thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel summary-box">
+    <h3>Resumen del plan</h3>
+    <div class="summary-grid">
+      <div class="kpi">Días hábiles proyectados<strong id="workdaysProjected">—</strong></div>
+      <div class="kpi">Horas programadas por día<strong id="dailySummary">—</strong></div>
+      <div class="kpi">Horario<strong id="scheduleSummary">—</strong></div>
+      <div class="kpi">Empresa / institución<strong id="companySummary">—</strong></div>
+    </div>
+  </section>
+
+  <div class="footer">Los datos se guardan localmente en este navegador. No se envían a ningún servidor.</div>
+</main>
+
+<dialog id="editDialog">
+  <div class="modal-head"><h3 id="dialogTitle">Editar día</h3></div>
+  <div class="modal-body">
+    <div class="field" style="margin-bottom:12px">
+      <label>Estado</label>
+      <select id="dialogStatus">
+        <option value="attended">Asistió</option>
+        <option value="absent">Faltó</option>
+        <option value="partial">Parcial</option>
+        <option value="off">No laborable / feriado</option>
+        <option value="scheduled">Programado / pendiente</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Horas realizadas</label>
+      <input id="dialogHours" type="number" min="0" step="0.25">
+    </div>
+    <div class="field">
+      <label>Observación</label>
+      <input id="dialogNote" type="text" maxlength="120" placeholder="Ej. cita, permiso, feriado...">
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn soft" id="clearDay">Restaurar predeterminado</button>
+    <button class="btn soft" id="cancelDialog">Cancelar</button>
+    <button class="btn primary" id="saveDay">Guardar</button>
+  </div>
+</dialog>
+
+<section id="printReport" aria-hidden="true"></section>
+<script src="js/app.js"></script>
+</body>
+</html>
