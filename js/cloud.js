@@ -13,13 +13,15 @@
     els.signIn.disabled=true; els.signUp.disabled=true;
     return;
   }
+  els.status.textContent='Nube disponible. Crea una cuenta o inicia sesión para sincronizar tu calendario.';
+  els.state.textContent='Nube disponible';
   const client=window.supabase.createClient(config.supabaseUrl,config.supabasePublishableKey);
   const setBusy=busy=>[els.signIn,els.signUp,els.sync,els.signOut].forEach(button=>{if(button)button.disabled=busy;});
   const message=(text,error=false)=>{els.status.textContent=text;els.state.textContent=error?'Error':'Conectado';els.state.classList.toggle('cloud-error',error);};
   function setSignedIn(user){
     const signed=Boolean(user); els.signIn.classList.toggle('hidden',signed); els.signUp.classList.toggle('hidden',signed);
     els.signOut.classList.toggle('hidden',!signed); els.sync.disabled=!signed; els.email.value=user?.email||'';
-    els.password.value=''; els.state.textContent=signed?'Conectado':'Local'; els.state.classList.remove('cloud-error');
+    els.password.value=''; els.state.textContent=signed?'Conectado':(ready?'Nube disponible':'Local'); els.state.classList.remove('cloud-error');
   }
   async function saveCloud(){
     const {data:{user}}=await client.auth.getUser(); if(!user)return;
